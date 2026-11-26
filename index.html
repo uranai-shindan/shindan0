@@ -1,0 +1,137 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>日主診断｜生年月日から読む、あなたの本質</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700;900&amp;display=swap">
+<style>
+:root{
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+  --bg:#F6F1FF; --card:#FFFFFF; --text:#1E1B4B; --sub:#5B5680; --line:#DDD3F5;
+  --accent:#6D28D9; --accent-text:#FFFFFF; --gold:#B45309; --chip:#EFE7FF;
+  color-scheme:light;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --bg:#17133A; --card:#221C55; --text:#F5F0FF; --sub:#C9BFF0; --line:#3D3481;
+    --accent:#FBBF24; --accent-text:#1E1B4B; --gold:#FBBF24; --chip:#2F2672;
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#17133A; --card:#221C55; --text:#F5F0FF; --sub:#C9BFF0; --line:#3D3481;
+  --accent:#FBBF24; --accent-text:#1E1B4B; --gold:#FBBF24; --chip:#2F2672;
+  color-scheme:dark;
+}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*,*::before,*::after{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font-family:'Noto Sans JP',system-ui,-apple-system,'Hiragino Sans',sans-serif;line-height:1.8}
+main{max-width:560px;margin:0 auto;padding:28px 18px 48px}
+h1{font-size:1.5rem;line-height:1.4;margin:0 0 6px;font-weight:900}
+.lead{color:var(--sub);margin:0 0 22px;font-size:.95rem}
+.card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:20px}
+label{display:block;font-weight:700;margin-bottom:8px}
+input[type=date]{width:100%;min-height:52px;font-size:1.1rem;padding:10px 14px;border-radius:12px;border:1px solid var(--line);background:var(--bg);color:var(--text);font-family:inherit}
+button{width:100%;min-height:52px;margin-top:14px;border:0;border-radius:12px;background:var(--accent);color:var(--accent-text);font-size:1.05rem;font-weight:700;font-family:inherit;cursor:pointer}
+button.ghost{background:transparent;color:var(--text);border:1px solid var(--line)}
+.err{color:#C2410C;margin:10px 0 0;min-height:1.4em;font-size:.9rem}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .err{color:#FDBA74}}
+#result{display:none;margin-top:22px}
+.badge{display:inline-block;background:var(--chip);color:var(--text);border-radius:999px;padding:4px 14px;font-size:.85rem;font-weight:700}
+.big{font-size:2.2rem;font-weight:900;margin:10px 0 0;line-height:1.3}
+.cat{font-size:1.05rem;font-weight:700;color:var(--gold);margin:4px 0 14px}
+.sec{margin-top:14px}
+.sec h2{font-size:.95rem;margin:0 0 2px;color:var(--gold)}
+.sec p{margin:0}
+.cta{margin-top:22px;border-top:1px dashed var(--line);padding-top:16px}
+.cta p{margin:0 0 6px}
+.note{color:var(--sub);font-size:.8rem;margin-top:22px;line-height:1.7}
+</style>
+</head>
+<body>
+<main>
+  <h1>日主診断</h1>
+  <p class="lead">生年月日から、あなたの「持って生まれた本質」を、10のタイプで読みます。入力した情報は、この画面の中で処理するだけで、保存も送信もしません。</p>
+
+  <section class="card" aria-label="生年月日の入力">
+    <label for="birth">生年月日</label>
+    <input id="birth" type="date" min="1920-01-01" autocomplete="bday">
+    <p class="err" id="err" role="alert"></p>
+    <button id="go" type="button">診断する</button>
+  </section>
+
+  <section class="card" id="result" aria-live="polite">
+    <span class="badge" id="elem"></span>
+    <p class="big" id="name"></p>
+    <p class="cat" id="cat"></p>
+    <p id="desc"></p>
+    <div class="sec"><h2>強み</h2><p id="good"></p></div>
+    <div class="sec"><h2>つまずきやすい点</h2><p id="weak"></p></div>
+    <div class="sec"><h2>ヒント</h2><p id="tip"></p></div>
+    <div class="cta">
+      <p>もっと詳しく知りたい方は、命式の全体（年・月・日・時）と、10年ごとの運の流れまで読む、長文の鑑定書があります。</p>
+      <p>ご希望の方は、X（@shin_0start）か、Threads（@shin_ai_uranai）のDMへ。</p>
+    </div>
+    <button class="ghost" id="again" type="button">もう一度診断する</button>
+  </section>
+
+  <p class="note">
+    ※エンタメ・気づきのための診断です。未来を保証するものではありません。<br>
+    ※日付が変わる時刻は、0時で区切っています。深夜に生まれた方は、結果が異なる場合があります。<br>
+    ※診断の文章は、AIを活用して作成し、内容は運営者が確認しています。
+  </p>
+</main>
+
+<script>
+(function(){
+  var T=[
+    {s:"甲",y:"きのえ",e:"木",n:"大樹",d:"空に向かってまっすぐ伸びる、大きな樹のような人です。向上心があり、正直で、人を引っ張る力があります。",g:"誠実で、前向き。目標に向かって、コツコツ進める力があります。",w:"こうと決めたら、曲げにくい面があります。折れる前に、柔軟さも持てると楽になります。",t:"疲れたと感じたら、早めに休むこと。曲げない強さと、しなる強さの両方が、あなたを守ります。"},
+    {s:"乙",y:"きのと",e:"木",n:"草花",d:"風に揺れながらも、根を張って咲く、草花のような人です。やさしく、協調性があり、粘り強さも持っています。",g:"人に寄り添う力と、環境に合わせる柔軟さがあります。",w:"周りに合わせすぎて、疲れをためやすい面があります。",t:"本音を、ほんの少しだけ、言葉にしてみてください。小さな一言が、関係を楽にします。"},
+    {s:"丙",y:"ひのえ",e:"火",n:"太陽",d:"周りを明るく照らす、太陽のような人です。華があり、前向きで、人を元気にする力があります。",g:"明るさと、行動力。場の空気を変える力があります。",w:"熱しやすく、冷めやすい面や、無理をして、明るく振る舞いすぎる面があります。",t:"照らす側の自分にも、休む時間を。充電できる場所を、持っておくと長続きします。"},
+    {s:"丁",y:"ひのと",e:"火",n:"灯火",d:"暗い夜に、静かに灯る、ろうそくの火のような人です。繊細で、あたたかく、集中力があります。",g:"気配りと、深い集中力。一人ひとりに、丁寧に向き合えます。",w:"気にしすぎて、心が疲れやすい面があります。",t:"一人で整理する時間を、大切に。気持ちを書き出すだけでも、灯りが安定します。"},
+    {s:"戊",y:"つちのえ",e:"土",n:"山",d:"どっしりと構える、大きな山のような人です。包容力があり、安定感があって、頼りにされます。",g:"落ち着きと、懐の深さ。周りに安心感を与えられます。",w:"動き出しが、ゆっくりになりやすく、頑固に見られることがあります。",t:"最初の一歩を、小さく決めましょう。小さく動けば、山も動きます。"},
+    {s:"己",y:"つちのと",e:"土",n:"田畑",d:"人や物事を育てる、田畑のような人です。面倒見がよく、堅実で、コツコツと積み上げられます。",g:"育てる力と、地道な努力。信頼を積み重ねられます。",w:"我慢しすぎて、自分を後回しにしやすい面があります。",t:"頼ることも、強さのうち。ひとつだけ、人に任せてみてください。"},
+    {s:"庚",y:"かのえ",e:"金",n:"鉄",d:"鍛えられて強くなる、鉄のような人です。意志が強く、義理堅く、筋を通す力があります。",g:"決断力と、正義感。一度決めたことを、やり抜く力があります。",w:"強がって、本音を隠したり、頑固に見られたりすることがあります。",t:"弱さを見せることは、弱さではありません。信頼できる人には、本音を少し出してみてください。"},
+    {s:"辛",y:"かのと",e:"金",n:"宝石",d:"磨かれるほど輝く、宝石のような人です。繊細で、美意識が高く、こだわりを持っています。",g:"感性の鋭さと、品のよさ。こだわりが、魅力になります。",w:"完璧を求めて、自分に厳しくなりすぎる面があります。",t:"60点で出す勇気を。磨きすぎる前に、休むことも、輝きを保つコツです。"},
+    {s:"壬",y:"みずのえ",e:"水",n:"大河",d:"大きく流れる、大河のような人です。包容力があり、自由を愛し、スケールの大きな発想を持っています。",g:"柔軟さと、器の大きさ。人や情報を、受け入れる力があります。",w:"気分の波が出やすく、抱え込んで、流れが止まることがあります。",t:"流れを止めないために、こまめに吐き出す場所を。話す、書く、歩く、何でも大丈夫です。"},
+    {s:"癸",y:"みずのと",e:"水",n:"雨・露",d:"しっとりと、静かに染み込む、雨や露のような人です。知的で、感受性が豊かで、人の気持ちに敏感です。",g:"洞察力と、やさしさ。見えない気持ちを、感じ取れます。",w:"考えすぎて、動けなくなることや、気持ちを溜め込むことがあります。",t:"考えを、言葉にして外に出すこと。一言でも、心の水かさが、減ります。"}
+  ];
+  var el=document.getElementById.bind(document);
+  var input=el("birth"), err=el("err"), res=el("result");
+  var today=new Date();
+  input.max=today.getFullYear()+"-"+String(today.getMonth()+1).padStart(2,"0")+"-"+String(today.getDate()).padStart(2,"0");
+
+  function stemIndex(y,m,d){
+    var base=Date.UTC(2000,0,1), t=Date.UTC(y,m-1,d);
+    var days=Math.round((t-base)/86400000);
+    var idx=(((54+days)%60)+60)%60;
+    return idx%10;
+  }
+  el("go").addEventListener("click",function(){
+    err.textContent="";
+    var v=input.value;
+    if(!v){err.textContent="生年月日を入力してください。";return;}
+    var p=v.split("-").map(Number);
+    if(p[0]<1920||p.length<3||isNaN(p[2])){err.textContent="1920年以降の生年月日を入力してください。";return;}
+    var r=T[stemIndex(p[0],p[1],p[2])];
+    el("elem").textContent="五行：「"+r.e+"」";
+    el("name").textContent=r.s+"（"+r.y+"）";
+    el("cat").textContent="あなたは、「"+r.n+"」のタイプ";
+    el("desc").textContent=r.d;
+    el("good").textContent=r.g;
+    el("weak").textContent=r.w;
+    el("tip").textContent=r.t;
+    res.style.display="block";
+    res.scrollIntoView({behavior:"smooth",block:"start"});
+  });
+  el("again").addEventListener("click",function(){
+    res.style.display="none"; input.value=""; input.focus();
+    window.scrollTo({top:0,behavior:"smooth"});
+  });
+})();
+</script>
+</body>
+</html>
